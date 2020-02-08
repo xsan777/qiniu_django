@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/qiniu-js@2.5.5/dist/qiniu.min.js"></script>
+</head>
+<body>
+
+
+<from>
+    <input type="file" id="img" value="上传图片">
+</from>
+上传后的url：<span id="img_url"></span>
+
+
+<script>
+    function up_err(ret) {
+        console.log(ret)
+    }
+
+    // 上传完图片后做的事情
+    function com_img(ret) {
+        var img_name = ret['key'];
+        var domine = 'http://img.xiaobaods.com/'; // cdn加速域名
+        var img_url = domine + img_name; //合成访问的链接
+        $('span#img_url').text(img_url);
+        // 在后端处理上传的图片
+        $.ajax({
+            url: '{% url 'dealwith_img' %}',
+            type: 'GET',
+            data: {'key': img_name},
+            dataType: 'json',
+            error: function () {
+                alert("处理失败")
+            }
+        })
+    }
+
+    $('#img').change(function () {
+            var token = '';
+            var file_img = $('#img').get(0).files[0];
+            var key = (new Date()).getTime() + '.' + file_img.name.split('.')[1];
+            $.ajax({
+                url: '{% url 'qntoken' %}',
+                type: 'GET',
+                data: {'key': key},
+                dataType: 'json',
+                success: function (token_msg) {
+                    token = token_msg['token'];
+                    console.log(token);
+                    var putExtra = {
+                        fname: key,
+                        params: {},
+                        mimeType: ['image/png', 'image/jpeg']
+                    };
+                    var config = {
+                        useCdnDomain: true,
+                        retryCount: 6,
+                        region: qiniu.region.z0
+                    };
+                    var observable = qiniu.upload(file_img, key, token, putExtra, config)
+                    var subscription = observable.subscribe({'error': up_err, 'complete': com_img}) // 上传开始
+                }
+            });
+        }
+    );
+
+</script>
+</body>
+</html>
