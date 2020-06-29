@@ -17,7 +17,8 @@ from django.contrib import admin
 from django.urls import path
 from qiniu_app import views
 urlpatterns = [
-    path('qntoken/', views.qntoken, name="qntoken"),
+
     path('', views.qiniu_test, name="qiniu_test"),
     path('dealwith_img/', views.dealwith_img, name="dealwith_img"),
+    path('qntoken/', views.qntoken, name="qntoken"),
 ]
