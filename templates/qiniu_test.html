@@ -58,7 +58,8 @@
                     var config = {
                         useCdnDomain: true,
                         retryCount: 6,
-                        region: qiniu.region.z0
+                        // 新版的sdk可以自动识别区域了，不在需要指定
+                        //region: qiniu.region.z0
                     };
                     var observable = qiniu.upload(file_img, key, token, putExtra, config)
                     var subscription = observable.subscribe({'error': up_err, 'complete': com_img}) // 上传开始
